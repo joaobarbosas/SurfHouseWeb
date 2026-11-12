@@ -27,7 +27,7 @@ Crystal Point Surf Ranch is a **demonstration landing page**, not a verified com
 
 ## Highlights
 
-- Scroll-linked canvas animation powered by `requestAnimationFrame`
+- Scroll-linked canvas animation with event-driven `requestAnimationFrame` rendering
 - Responsive full-screen hero with a cover-fit drawing strategy
 - Floating navigation, editorial sections and motion transitions
 - Testimonial carousel and footer email-capture interface
@@ -40,7 +40,7 @@ Crystal Point Surf Ranch is a **demonstration landing page**, not a verified com
 ```bash
 git clone https://github.com/joaobarbosas/SurfHouseWeb.git
 cd SurfHouseWeb
-npm install
+npm ci
 npm run dev
 ```
 
@@ -54,7 +54,7 @@ npm run build
 npm run start
 ```
 
-> These commands come from `package.json`. The build, lint and full browser experience have **not been independently verified** as passing here.
+> Validation: `npm ci`, `npm run lint` (two existing image optimization warnings) and `npm run build` passed on Node.js 24.22.1. The 193 JPEG files are present and decode successfully. Chromium CI checks passed at 1440, 390 and 320 px, including all frame HTTP responses, no horizontal overflow, no console/page errors in tested flows and static reduced-motion behavior. Asset-license checks are tracked separately below.
 
 ## How the scroll hero works
 
@@ -64,7 +64,7 @@ The component `components/scroll-hero.tsx`:
 2. Converts scroll position into a frame index.
 3. Draws the current frame to `canvas` using `requestAnimationFrame`.
 4. Resizes the canvas with the viewport and redraws the active frame.
-5. Checks `prefers-reduced-motion` before enabling scroll-driven updates.
+5. Responds to `prefers-reduced-motion` changes; reduced-motion visitors initially load only the first frame.
 
 The frame count is defined by `FRAME_COUNT = 193`.
 
@@ -89,14 +89,51 @@ When changing the number of images, also update `FRAME_COUNT` in `components/scr
 
 ## Portfolio review notes
 
-- No automated test script is currently declared in `package.json`.
+- Four Playwright browser tests run in CI using `npx playwright test`.
 - Check performance and memory usage on mobile devices: loading 193 full-size images can be expensive.
 - Verify that image/video assets and fonts are licensed for public portfolio use.
 - The email-capture UI should not be presented as a functioning subscription service unless its backend integration is verified.
-- The repository currently uses a feature-style default branch name; this is a repository-setting cleanup task, not a requirement for running the app.
+- `main` is the default branch. The original development branch is preserved; no branches were deleted.
 
 ## Author
 
 **João Pedro** — Software Developer
 
 [GitHub](https://github.com/joaobarbosas) · [LinkedIn](https://linkedin.com/in/joaopedrosanchess)
+
+
+## Assets and publication status
+
+The 193 existing frames total approximately 39 MiB on disk. Their original
+footage, author and license are **not documented** in the repository. The
+Unsplash image URLs identify a host but do not establish individual asset
+provenance or model/property permissions. Fonts are loaded through
+`next/font/google` (Bodoni Moda and Jost); preserve their upstream license
+notices when redistributing font files.
+
+Do not deploy or reuse the existing imagery until its provenance and rights
+are confirmed, or replace it with documented, licensed assets. No new image
+or screenshot is published by this maintenance change. Fictional testimonial
+copy is explicitly labeled and no longer attributed to a real athlete.
+
+Reduced-motion mode uses a static first frame, a one-viewport hero and disables
+CSS animation; MotionConfig respects the user preference for transform motion.
+Normal mode still preloads the full sequence, so mobile decoded-image memory
+and bandwidth remain optimization opportunities. The animation now schedules
+frames on events instead of running an idle animation loop continuously.
+
+
+## Browser regression tests
+
+```bash
+npm ci
+npm run build
+npx playwright install chromium
+npx playwright test
+```
+
+The test server starts automatically. CI also installs Chromium system
+dependencies. Tests cover desktop and narrow layouts, section scrolling,
+frame delivery and reduced-motion loading. They do not prove cross-browser
+compatibility, accessibility compliance or performance on physical phones.
+No screenshot is included while the original imagery's rights remain unverified.

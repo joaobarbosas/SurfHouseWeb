@@ -30,3 +30,12 @@ body {
   from { transform: translateY(-100%); }
   to   { transform: translateY(300%); }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .scroll-hero { height: 100vh !important; }
+}

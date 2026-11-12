@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, MotionConfig } from 'framer-motion'
 import Navbar from '@/components/navbar'
 import ScrollHero from '@/components/scroll-hero'
 import Features from '@/components/features'
@@ -46,6 +46,7 @@ function Manifesto() {
 
 export default function Home() {
   return (
+    <MotionConfig reducedMotion="user">
     <main style={{ background: '#0C0A09', color: '#FAFAF9' }}>
       <Navbar />
       <ScrollHero />
@@ -55,5 +56,6 @@ export default function Home() {
       <Testimonials />
       <Footer />
     </main>
+    </MotionConfig>
   )
 }
