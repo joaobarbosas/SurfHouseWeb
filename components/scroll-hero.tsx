@@ -15,89 +15,82 @@ export default function ScrollHero() {
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
-
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Cover-fit draw: fills the canvas like object-fit: cover
-    const drawFrame = (img: HTMLImageElement) => {
-      const cw = canvas.width
-      const ch = canvas.height
-      const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight)
-      const sw = img.naturalWidth * scale
-      const sh = img.naturalHeight * scale
-      ctx.drawImage(img, (cw - sw) / 2, (ch - sh) / 2, sw, sh)
-    }
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const frames: HTMLImageElement[] = []
+    framesRef.current = frames
+    let disposed = false
+    let raf = 0
+    let targetIndex = 0
+    let sequenceRequested = false
 
-    // Size canvas to viewport — redraw current frame after resize
+    const draw = () => {
+      raf = 0
+      if (disposed) return
+      const img = frames[targetIndex]
+      if (!img?.complete || !img.naturalWidth) return
+      const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight)
+      const width = img.naturalWidth * scale
+      const height = img.naturalHeight * scale
+      ctx.drawImage(img, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height)
+      canvas.style.opacity = '1'
+      currentIndexRef.current = targetIndex
+    }
+    const scheduleDraw = () => {
+      if (!disposed && !raf) raf = requestAnimationFrame(draw)
+    }
     const resize = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
-      const f = framesRef.current[currentIndexRef.current]
-      if (f?.complete) drawFrame(f)
+      scheduleDraw()
     }
-    resize()
-    window.addEventListener('resize', resize)
-
-    // Preload all frames. Show frame 0 the moment it arrives.
-    const frames: HTMLImageElement[] = new Array(FRAME_COUNT)
-    framesRef.current = frames
-    let firstShown = false
-
-    for (let i = 0; i < FRAME_COUNT; i++) {
+    const loadFrame = (index: number) => {
       const img = new Image()
-      img.src = `/frames/frame_${String(i + 1).padStart(4, '0')}.jpg`
+      frames[index] = img
       img.onload = () => {
-        frames[i] = img
-        if (!firstShown && i === 0) {
-          firstShown = true
-          canvas.style.opacity = '1'
-          drawFrame(img)
-        }
+        if (index === targetIndex) scheduleDraw()
       }
+      img.src = `/frames/frame_${String(index + 1).padStart(4, '0')}.jpg`
     }
-
-    let targetIndex = 0
-    let lastDrawnIndex = -1
-    let raf: number
-
     const onScroll = () => {
-      const { top } = container.getBoundingClientRect()
       const scrollable = container.offsetHeight - window.innerHeight
-      const progress = Math.min(1, Math.max(0, -top / scrollable))
+      const progress = media.matches || scrollable <= 0 ? 0 : Math.min(1,
+        Math.max(0, -container.getBoundingClientRect().top / scrollable))
       targetIndex = Math.round(progress * (FRAME_COUNT - 1))
-
-      // Update overlay directly — no React re-renders in the scroll hot path
       if (overlayRef.current) {
         overlayRef.current.style.opacity = String(Math.max(0, 1 - progress * 3))
       }
+      scheduleDraw()
     }
-
-    // rAF loop: draw whenever the target frame changes and that image is ready
-    const tick = () => {
-      if (targetIndex !== lastDrawnIndex && frames[targetIndex]?.complete) {
-        currentIndexRef.current = targetIndex
-        drawFrame(frames[targetIndex])
-        lastDrawnIndex = targetIndex
+    const configureMotion = () => {
+      // Reduced-motion visitors only request the static first frame.
+      if (!media.matches && !sequenceRequested) {
+        sequenceRequested = true
+        for (let i = 1; i < FRAME_COUNT; i++) loadFrame(i)
       }
-      raf = requestAnimationFrame(tick)
+      onScroll()
     }
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!prefersReduced) {
-      window.addEventListener('scroll', onScroll, { passive: true })
-      raf = requestAnimationFrame(tick)
-    }
-
+    loadFrame(0)
+    resize()
+    configureMotion()
+    window.addEventListener('resize', resize)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    media.addEventListener('change', configureMotion)
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      disposed = true
       window.removeEventListener('resize', resize)
+      window.removeEventListener('scroll', onScroll)
+      media.removeEventListener('change', configureMotion)
       cancelAnimationFrame(raf)
+      frames.forEach(img => { img.onload = null })
     }
   }, [])
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', height: '300vh' }}>
+    <div ref={containerRef} className="scroll-hero" style={{ position: 'relative', height: '300vh' }}>
       <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100vw', overflow: 'hidden' }}>
 
         <canvas

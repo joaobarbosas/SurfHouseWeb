@@ -42,7 +42,7 @@ export default function Features() {
         {features.map((f, i) => (
           <div key={f.number} className={`grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center ${i % 2 === 1 ? 'md:[direction:rtl]' : ''}`}>
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={imgReveal} className="relative overflow-hidden rounded-sm aspect-[4/3] [direction:ltr]">
-              <img src={f.image} alt={f.title} className="w-full h-full object-cover" />
+              <img src={f.image} alt={f.title} loading="lazy" width={1200} height={900} className="w-full h-full object-cover" />
               <div className="absolute bottom-6 right-6 text-right">
                 <div className="text-5xl font-light text-white" style={{ fontFamily: 'var(--font-bodoni)' }}>{f.stat}</div>
                 <div className="text-[10px] tracking-[0.3em] uppercase text-white/60 mt-1" style={{ fontFamily: 'var(--font-jost)' }}>{f.statLabel}</div>
