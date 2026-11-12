@@ -54,7 +54,7 @@ npm run build
 npm run start
 ```
 
-> Validation: `npm ci`, `npm run lint` (two existing image optimization warnings) and `npm run build` passed on Node.js 24.22.1. The 193 JPEG files are present and decode successfully. Browser and asset-license checks are tracked separately below.
+> Validation: `npm ci`, `npm run lint` (two existing image optimization warnings) and `npm run build` passed on Node.js 24.22.1. The 193 JPEG files are present and decode successfully. Chromium CI checks passed at 1440, 390 and 320 px, including all frame HTTP responses, no horizontal overflow, no console/page errors in tested flows and static reduced-motion behavior. Asset-license checks are tracked separately below.
 
 ## How the scroll hero works
 
@@ -89,11 +89,11 @@ When changing the number of images, also update `FRAME_COUNT` in `components/scr
 
 ## Portfolio review notes
 
-- No automated test script is currently declared in `package.json`.
+- Four Playwright browser tests run in CI using `npx playwright test`.
 - Check performance and memory usage on mobile devices: loading 193 full-size images can be expensive.
 - Verify that image/video assets and fonts are licensed for public portfolio use.
 - The email-capture UI should not be presented as a functioning subscription service unless its backend integration is verified.
-- The repository default branch setting still requires authenticated administrative access. No branches have been deleted.
+- `main` is the default branch. The original development branch is preserved; no branches were deleted.
 
 ## Author
 
@@ -121,3 +121,19 @@ CSS animation; MotionConfig respects the user preference for transform motion.
 Normal mode still preloads the full sequence, so mobile decoded-image memory
 and bandwidth remain optimization opportunities. The animation now schedules
 frames on events instead of running an idle animation loop continuously.
+
+
+## Browser regression tests
+
+```bash
+npm ci
+npm run build
+npx playwright install chromium
+npx playwright test
+```
+
+The test server starts automatically. CI also installs Chromium system
+dependencies. Tests cover desktop and narrow layouts, section scrolling,
+frame delivery and reduced-motion loading. They do not prove cross-browser
+compatibility, accessibility compliance or performance on physical phones.
+No screenshot is included while the original imagery's rights remain unverified.
