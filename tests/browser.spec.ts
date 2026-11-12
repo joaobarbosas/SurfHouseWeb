@@ -5,6 +5,9 @@ for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 })
     const errors: string[] = []
     page.on('pageerror', error => errors.push(error.message))
+    page.on('console', message => {
+      if (message.type() === 'error') errors.push(message.text())
+    })
     const failedFrames: string[] = []
     page.on('requestfailed', req => {
       if (req.url().includes('/frames/')) failedFrames.push(req.url())
@@ -14,7 +17,12 @@ for (const width of [1440, 390, 320]) {
     await expect(page.locator('canvas')).toHaveCSS('opacity', '1')
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
     await page.evaluate(() => window.scrollTo(0, innerHeight))
-    // Decode every original frame, not just the first one.
+    for (const id of ['experience', 'guests', 'reserve']) {
+      await page.locator(`#${id}`).scrollIntoViewIfNeeded()
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+        .toBe(true)
+    }
+    // Verify HTTP delivery for every frame; JPEG decoding is checked separately.
     for (let i = 1; i <= 193; i++) {
       const response = await request.get(`/frames/frame_${String(i).padStart(4, '0')}.jpg`)
       expect(response.ok()).toBe(true)

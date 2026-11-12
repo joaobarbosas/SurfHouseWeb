@@ -30,12 +30,12 @@ export default function Testimonials() {
         </motion.p>
 
         <p className="text-xs text-white/50 mb-8">Fictional testimonials for this portfolio concept. Portraits are illustrative.</p>
-        <div className="flex items-start gap-8">
+        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-8">
           <span className="text-[100px] md:text-[140px] font-light leading-none text-white/[0.06] select-none shrink-0" style={{ fontFamily: 'var(--font-bodoni)' }}>
             {String(active + 1).padStart(2, '0')}
           </span>
 
-          <div className="flex-1 pt-4">
+          <div className="min-w-0 flex-1 pt-4">
             <AnimatePresence mode="wait">
               <motion.blockquote key={current.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.4 }}
                 className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed text-white/80 tracking-tight"

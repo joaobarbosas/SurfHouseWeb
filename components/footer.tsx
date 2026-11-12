@@ -17,7 +17,7 @@ export default function Footer() {
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-4 max-w-md w-full">
             <p className="text-white/40 text-sm leading-relaxed" style={{ fontFamily: 'var(--font-jost)', fontWeight: 300 }}>Availability is intentionally limited to maintain exclusivity. Send your details and our team will respond within 24 hours.</p>
             <div className="flex gap-3">
-              <input type="email" placeholder="your@email.com" className="flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-3 text-sm text-white/80 placeholder:text-white/25 focus:outline-none focus:border-[#CA8A04]/50 transition-colors" style={{ fontFamily: 'var(--font-jost)' }} />
+              <input type="email" placeholder="your@email.com" aria-label="Email address (demo only)" className="min-w-0 flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-3 text-sm text-white/80 placeholder:text-white/25 focus:outline-none focus:border-[#CA8A04]/50 transition-colors" style={{ fontFamily: 'var(--font-jost)' }} />
               <button className="px-6 py-3 rounded-full bg-[#CA8A04] text-[#0C0A09] text-[11px] tracking-[0.2em] uppercase font-semibold hover:bg-[#d4920a] transition-colors cursor-pointer" style={{ fontFamily: 'var(--font-jost)' }}>Inquire</button>
             </div>
           </motion.div>
